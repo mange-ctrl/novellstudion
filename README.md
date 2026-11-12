@@ -11,6 +11,8 @@ autentiska utdrag och din uppgift.
 Ren Python, inga tredjepartspaket, ingen GPU. Allt kör på CPU med
 standardbiblioteket — SQLite med FTS5 gör sökningen.
 
+![Novellstudion](assets/screenshot.png)
+
 ---
 
 ## Vad det är
