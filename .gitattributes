@@ -1,0 +1,11 @@
+# Normalisera radslut så att repot beter sig likadant på alla plattformar
+* text=auto eol=lf
+
+# Windows-skript ska behålla CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binärfiler
+*.ico binary
+*.png binary

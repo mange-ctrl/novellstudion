@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Byggresultat
+build/
+dist/
+*.spec.bak
+_MEI*/
+
+# Index, korpus och genererat innehåll
+out/
+corpus/
+corpus-html/
+*.db
+*.db-journal
+*.db-wal
+
+# Sparat gränssnittsläge och lokala anteckningar
+spara*.json
+start.log
+KOPIA-INFO.md
+
+# Operativsystem och editor
+Thumbs.db
+.DS_Store
+desktop.ini
+.vscode/
+.idea/

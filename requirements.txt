@@ -1,0 +1,6 @@
+# inga obligatoriska beroenden — allt använder Pythons standardbibliotek.
+#
+# Valfritt:
+#   python-docx   krävs bara om du vill läsa .docx-filer med "build"
+#
+# Kräver Python 3.10 eller nyare.

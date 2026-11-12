@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novellstudion · stil-lab</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo" aria-hidden="true">N</div>
+    <div class="brand-text">
+      <h1>Novellstudion</h1>
+      <p id="brandSub">stil-lab</p>
+    </div>
+  </div>
+
+  <div class="conn" id="conn">
+    <div class="addr">
+      <span class="dot" id="connDot" title="Anslutningsstatus"></span>
+      <input id="baseUrl" type="text" spellcheck="false" autocomplete="off"
+             placeholder="127.0.0.1:8088" aria-label="LLM-serverns adress">
+      <button id="connectBtn" class="btn tiny">Anslut</button>
+    </div>
+    <div class="model-wrap">
+      <select id="modelSelect" aria-label="Modell">
+        <option value="">Anslut för att se modeller</option>
+      </select>
+      <input id="modelManual" class="hidden" type="text" spellcheck="false"
+             placeholder="modellnamn, t.ex. qwen2.5:7b" aria-label="Modellnamn">
+    </div>
+    <span id="connText" class="conn-text">Inte ansluten</span>
+  </div>
+
+  <div class="top-actions">
+    <button id="resetBtn" class="btn ghost" type="button" title="Nollställ inställningarna — novellerna flyttas till en backup-mapp">Nollställ</button>
+    <button id="libraryBtn" class="btn ghost">Bibliotek</button>
+    <button id="helpBtn" class="btn ghost icon" title="Hjälp (?)">?</button>
+    <span class="adult" title="Endast för vuxna">18+</span>
+  </div>
+</header>
+
+<main class="app">
+  <aside class="sidebar">
+    <div class="side-scroll">
+
+      <details class="group" open>
+        <summary><span>Scenen</span><em>det modellen ska skriva</em></summary>
+        <div class="group-body">
+          <label class="field">
+            <span class="label">Vad ska hända? <em>en rad räcker</em></span>
+            <textarea id="scene" rows="3" placeholder="Ett kök sent på kvällen. Två grannar som känt varandra i tio år. Hon har bestämt sig för att säga något."></textarea>
+          </label>
+
+          <details class="mini" id="sceneMore">
+            <summary>Plats, personer och insats <em>(valfritt)</em></summary>
+            <div class="stack">
+              <div class="two">
+                <label class="field"><span class="label">Plats</span>
+                  <input id="place" type="text" placeholder="ett kök, sent på kvällen"></label>
+                <label class="field"><span class="label">Personer</span>
+                  <input id="characters" type="text" placeholder="två grannar i fyrtioårsåldern"></label>
+              </div>
+
+              <label class="field">
+                <span class="label">Det som står på spel</span>
+                <textarea id="stakes" rows="2" placeholder="hon har bestämt sig, han vet det inte"></textarea>
+              </label>
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary><span>Novellen</span><em>kategori, längd, sexgrad</em></summary>
+        <div class="group-body">
+
+          <label class="field">
+            <span class="label">Kategori <em>styr vilka stilprover som hämtas</em></span>
+            <select id="category"></select>
+          </label>
+
+          <div class="field">
+            <span class="label">Längd <output id="lengthOut" for="length">1 200 ord</output></span>
+            <input type="range" id="length" min="300" max="5000" step="100" value="1200">
+            <div class="chips small" id="lengthPresets"></div>
+          </div>
+
+          <div class="field">
+            <span class="label">Sexgrad <output id="sexOut" for="sexSeg">3 · Tydlig</output></span>
+            <div class="seg" id="sexSeg" role="radiogroup" aria-label="Sexgrad 1 till 5"></div>
+            <p class="hint" id="sexDesc"></p>
+          </div>
+
+          <div class="field">
+            <span class="label">Sexuella ord <em>klicka för att ta med</em></span>
+            <div class="chips scrollable" id="wordChips"></div>
+            <div class="row">
+              <input id="wordInput" type="text" placeholder="Eget ord, tryck Enter" aria-label="Eget ord">
+              <button id="wordAdd" class="btn tiny">Lägg till</button>
+            </div>
+            <div class="chips chosen" id="chosenWords"></div>
+          </div>
+
+          <details class="mini">
+            <summary>Undvik ord och fraser</summary>
+            <label class="field" style="margin-top:8px">
+              <input id="wordsAvoid" type="text" placeholder="t.ex. hennes kön, pulserande">
+            </label>
+          </details>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span>Detaljer</span><em>ton, perspektiv, titel</em></summary>
+        <div class="group-body">
+          <div class="two">
+            <label class="field"><span class="label">Ton</span><select id="tone"></select></label>
+            <label class="field"><span class="label">Slut</span><select id="ending"></select></label>
+          </div>
+
+          <div class="three">
+            <label class="field"><span class="label">Perspektiv</span><select id="pov"></select></label>
+            <label class="field"><span class="label">Tempus</span><select id="tense"></select></label>
+            <label class="field"><span class="label">Dialog</span><select id="dialogue"></select></label>
+          </div>
+
+          <label class="field">
+            <span class="label">Titel <em>valfri</em></span>
+            <input id="title" type="text" placeholder="får modellen annars föreslå">
+          </label>
+
+          <label class="field">
+            <span class="label">Extra instruktion <em>valfri</em></span>
+            <textarea id="extra" rows="2" placeholder="t.ex. sluta med en mening som inte säger allt"></textarea>
+          </label>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span>Stil och utdrag</span><em>korpusen</em></summary>
+        <div class="group-body">
+          <div class="field">
+            <span class="label">Antal stilprover <output id="kOut" for="k">3</output></span>
+            <input type="range" id="k" min="0" max="6" step="1" value="3">
+            <p class="hint">Fler prover = närmare stilen, men längre prompt. 0 stänger av.</p>
+          </div>
+          <div class="field">
+            <span class="label">Max per novell <output id="perStoryOut" for="perStory">1</output></span>
+            <input type="range" id="perStory" min="1" max="3" step="1" value="1">
+          </div>
+          <label class="check"><input type="checkbox" id="categoryFilter" checked>
+            Bara prover från vald kategori</label>
+          <label class="check"><input type="checkbox" id="useStyleCard" checked>
+            Använd stilkortet (mätta siffror om rytm och dialog)</label>
+          <details class="mini">
+            <summary>Visa stilkortet</summary>
+            <pre id="styleCardPreview" class="style-card"></pre>
+          </details>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span>Var ska novellen ligga?</span><em>mapp och filnamn</em></summary>
+        <div class="group-body">
+          <label class="field">
+            <span class="label">Mapp</span>
+            <div class="row">
+              <input id="folder" type="text" spellcheck="false" placeholder="out/noveller">
+              <button id="browseBtn" class="btn tiny">Bläddra…</button>
+            </div>
+          </label>
+          <label class="field">
+            <span class="label">Filnamn <em>tomt = automatiskt</em></span>
+            <input id="filename" type="text" spellcheck="false" placeholder="2026-11-06-koket-sent.md">
+          </label>
+          <label class="check"><input type="checkbox" id="autosave" checked>
+            Spara automatiskt efter varje text</label>
+          <div class="path-preview" id="pathPreview"></div>
+          <button id="openFolderBtn" class="btn tiny ghost">Öppna mappen i Utforskaren</button>
+        </div>
+      </details>
+
+      <details class="group" id="advancedGroup">
+        <summary><span>Avancerat</span><em>modell och samplingsparametrar</em></summary>
+        <div class="group-body">
+          <div class="two">
+            <label class="field"><span class="label">Temperatur <output id="tempOut" for="temperature">0,85</output></span>
+              <input type="range" id="temperature" min="0.1" max="1.5" step="0.05" value="0.85"></label>
+            <label class="field"><span class="label">Top-p <output id="topPOut" for="topP">0,90</output></span>
+              <input type="range" id="topP" min="0.1" max="1" step="0.05" value="0.9"></label>
+          </div>
+          <div class="two">
+            <label class="field"><span class="label">Max tokens <em>0 = automatiskt</em></span>
+              <input id="maxTokens" type="number" min="0" max="32768" step="64" value="0"></label>
+            <label class="field"><span class="label">Seed <em>tomt = slumpen</em></span>
+              <input id="seed" type="number" min="0" step="1" placeholder="slump"></label>
+          </div>
+          <p class="hint" id="maxTokensHint"></p>
+          <label class="field"><span class="label">Upprepningsstraff <output id="repeatOut" for="repeatPenalty">1,20</output></span>
+            <input type="range" id="repeatPenalty" min="1.1" max="1.5" step="0.01" value="1.2">
+            <p class="hint">1,20 rekommenderas. Lågt straff eller hög temperatur ger lätt upprepade stycken.</p></label>
+          <label class="check"><input type="checkbox" id="disableThinking" checked>
+            Stäng av resonemang (llama.cpp/Qwen3)</label>
+          <label class="field"><span class="label">API-nyckel <em>bara för molnservrar</em></span>
+            <input id="apiKey" type="password" autocomplete="off" placeholder="lämnas tom för lokala servrar"></label>
+          <label class="check"><input type="checkbox" id="rememberKey">
+            Kom ihåg nyckeln på den här datorn</label>
+          <div class="server-detail" id="serverDetail"></div>
+        </div>
+      </details>
+
+    </div>
+
+    <div class="side-foot">
+      <div id="contextWarning" class="context-warning hidden">
+        <span id="contextWarningText"></span>
+        <button id="contextFit" type="button">Anpassa</button>
+        <button id="contextHelp" type="button">Hur?</button>
+      </div>
+      <div class="dest"><span>Sparas i</span><button id="destBtn" type="button" title="Byt mapp"></button></div>
+      <button id="generateBtn" class="btn primary big">Skriv novell <kbd>Ctrl ↵</kbd></button>
+      <button id="continueBtn" class="btn ghost wide" disabled>Fortsätt på texten</button>
+    </div>
+  </aside>
+
+  <section class="workspace">
+    <div class="work-toolbar">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="text" role="tab">Text</button>
+        <button class="tab" data-tab="prompt" role="tab">Prompt</button>
+        <button class="tab" data-tab="rag" role="tab">Stilprover <span class="count" id="hitCount"></span></button>
+      </div>
+      <div class="work-meta">
+        <span class="badge" id="wordBadge">0 ord</span>
+        <span class="streaming hidden" id="streamBadge"><i></i> skriver</span>
+        <button id="stopBtn" class="btn tiny danger hidden">Stopp</button>
+        <span class="divider"></span>
+        <button id="saveBtn" class="btn tiny">Spara</button>
+        <button id="editBtn" class="btn tiny ghost" title="Redigera texten i papperet">Redigera</button>
+        <button id="copyBtn" class="btn tiny ghost">Kopiera</button>
+        <button id="downloadBtn" class="btn tiny ghost" title="Ladda ner som fil">Ladda ner</button>
+        <button id="clearBtn" class="btn tiny ghost" title="Töm textrutan">Töm</button>
+      </div>
+    </div>
+
+    <div class="work-body">
+      <div class="pane" id="paneText">
+        <article class="paper" id="paper">
+          <div class="empty" id="emptyState">
+            <div class="empty-mark" aria-hidden="true">✎</div>
+            <h2>Ett tomt blad</h2>
+            <p>Beskriv scenen till vänster, välj sexgrad och längd — och tryck <strong>Skriv novell</strong>. Modellen får stilkort och autentiska utdrag ur korpusen som stöd.</p>
+            <div class="examples">
+              <span>Prova:</span>
+              <button class="chip" data-example="koket">Köket sent</button>
+              <button class="chip" data-example="taget">Nattåget</button>
+              <button class="chip" data-example="stugan">Stugan vid sjön</button>
+            </div>
+            <p class="empty-foot">All text är påhittad och avsedd för vuxna. Alla personer i berättelsen är 18 år eller äldre.</p>
+          </div>
+          <div class="paper-head hidden" id="paperHead">
+            <h2 id="paperTitle"></h2>
+            <p id="paperMeta"></p>
+          </div>
+          <div class="prose" id="prose"></div>
+        </article>
+      </div>
+
+      <div class="pane hidden" id="panePrompt">
+        <div class="pane-tools">
+          <label class="check"><input type="checkbox" id="useEdited">
+            Använd den redigerade prompten</label>
+          <span class="muted" id="promptStats"></span>
+          <span class="grow"></span>
+          <button id="rebuildPromptBtn" class="btn tiny ghost">Bygg om</button>
+          <button id="copyPromptBtn" class="btn tiny ghost">Kopiera</button>
+        </div>
+        <textarea id="promptText" spellcheck="false" placeholder="Prompten byggs automatiskt när du förhandsgranskar eller skriver."></textarea>
+      </div>
+
+      <div class="pane hidden" id="paneRag">
+        <div class="pane-tools wrap">
+          <input id="searchQuery" type="text" spellcheck="false" placeholder="Egna sökord till stilproverna (BM25)">
+          <button id="ragSearchBtn" class="btn tiny">Sök</button>
+          <span class="muted" id="ragNote"></span>
+        </div>
+        <div class="hit-list" id="hitList"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- 18+ -->
+<div class="gate hidden" id="gate">
+  <div class="gate-card">
+    <div class="gate-mark">18+</div>
+    <h2>Vuxet material</h2>
+    <p>Novellstudion arbetar med erotisk litteratur för vuxna. Verktyget skapar text mellan vuxna personer, och alla figurer i berättelserna är 18 år eller äldre.</p>
+    <p class="gate-small">Genom att fortsätta bekräftar du att du är minst 18 år och att du är ensam vid skärmen.</p>
+    <button id="gateBtn" class="btn primary big">Jag är 18 eller äldre</button>
+    <a class="gate-leave" href="https://www.google.com">Lämna sidan</a>
+  </div>
+</div>
+
+<!-- Bibliotek -->
+<aside class="drawer hidden" id="library">
+  <header class="drawer-head">
+    <div>
+      <h2>Bibliotek</h2>
+      <p class="muted" id="librarySub">Sparade noveller</p>
+    </div>
+    <button class="btn ghost icon" id="libraryClose" aria-label="Stäng">×</button>
+  </header>
+  <div class="drawer-body" id="libraryList"></div>
+  <p class="drawer-empty" id="libraryEmpty">Inget sparat än. Texter du skriver sparas automatiskt i mappen du valt.</p>
+</aside>
+
+<!-- Mappväljare -->
+<div class="modal hidden" id="folderModal">
+  <div class="modal-card folder-card">
+    <header class="modal-head">
+      <h2>Välj mapp</h2>
+      <button class="btn ghost icon" id="folderClose" aria-label="Stäng">×</button>
+    </header>
+    <div class="folder-body">
+      <nav class="folder-places" id="folderPlaces"></nav>
+      <div class="folder-main">
+        <div class="folder-bar">
+          <button id="folderUp" class="btn tiny ghost" title="Upp en nivå">↑</button>
+          <input id="folderPath" type="text" spellcheck="false">
+          <button id="folderGo" class="btn tiny">Gå</button>
+        </div>
+        <div class="folder-list" id="folderList"></div>
+        <div class="folder-new">
+          <input id="folderNewName" type="text" placeholder="Namn på ny mapp">
+          <button id="folderNewBtn" class="btn tiny ghost">Skapa mapp</button>
+        </div>
+      </div>
+    </div>
+    <footer class="modal-foot">
+      <span class="muted" id="folderChosen"></span>
+      <span class="grow"></span>
+      <button id="folderCancel" class="btn ghost">Avbryt</button>
+      <button id="folderChoose" class="btn primary">Använd den här mappen</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Hjälp -->
+<div class="modal hidden" id="helpModal">
+  <div class="modal-card help-card">
+    <header class="modal-head">
+      <h2>Så funkar det</h2>
+      <button class="btn ghost icon" id="helpClose" aria-label="Stäng">×</button>
+    </header>
+    <div class="help-body">
+      <ol>
+        <li><strong>Anslut.</strong> Skriv adressen till din LLM-server, t.ex. <code>127.0.0.1:8088</code> (llama.cpp) eller <code>192.168.1.139:8089</code>. Tryck <em>Anslut</em> — modellistan fylls automatiskt.</li>
+        <li><strong>Beskriv scenen.</strong> En rad räcker. Plats, personer och det som står på spel gör mest skillnad. Använd konkreta ord: BM25 letar ord, inte betydelse.</li>
+        <li><strong>Välj sexgrad 1–5.</strong> Nivån styr både instruktionen och vilka ord modellen uppmuntras använda. Klicka på ordbrickorna för att styra ordvalet.</li>
+        <li><strong>Skriv.</strong> Stilkort och 3 utdrag ur korpusen läggs automatiskt in. Texten strömmas fram och sparas i mappen du valt.</li>
+        <li><strong>Fortsätt.</strong> Om texten slutar mitt i kan du trycka <em>Fortsätt på texten</em> — modellen får då slutet som sammanhang.</li>
+      </ol>
+      <h3 id="help-context">Om servern har för liten kontext</h3>
+      <p>Stilkort, stilprover och en hel novell måste rymmas i serverns kontextfönster. Har servern bara <code>2048</code> tokens tar prompten nästan allt, och svaret kapas efter några rader. Starta om llama.cpp med en större kontext, till exempel <code>-c 16384</code> (eller <code>--ctx-size 16384</code>), och anslut igen.</p>
+      <p>Resonerande modeller (Qwen3 m.fl.) lägger annars hela svarsbudgeten på att tänka. Kryssa i <em>Stäng av modellens resonemang</em> under Avancerat om svaret blir tomt.</p>
+      <h3>Genvägar</h3>
+      <p><kbd>Ctrl</kbd> + <kbd>Enter</kbd> skriver · <kbd>Ctrl</kbd> + <kbd>S</kbd> sparar · <kbd>Esc</kbd> stänger fönster.</p>
+      <h3>Bra att veta</h3>
+      <ul>
+        <li>Modellen skriver texten, inte verktyget. Verktyget ger den rätt förutsättningar.</li>
+        <li>Utdragen är hämtade ur 1 471 vuxennoveller. Kategorier med minderåriga är borttagna redan vid import.</li>
+        <li>Ett svar som avbryts mitt i beror oftast på <em>Max tokens</em> eller modellens kontextfönster.</li>
+        <li>Allt körs lokalt i din dator. Ingenting skickas någonstans förutom till den LLM-adress du anger.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="/static/app.js" defer></script>
+</body>
+</html>
