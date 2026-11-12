@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/novellstudion.png" width="128" alt="Novellstudion">
+</p>
+
 # Novellstudion
 
 **Stil-RAG för svensk prosa.** Läs en samling noveller, mät stilen kvantitativt,
